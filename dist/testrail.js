@@ -6,7 +6,7 @@ var moment = require("moment");
 var TestRail = /** @class */ (function () {
     function TestRail(options) {
         this.options = options;
-        this.projectId = 2;
+        this.projectId = options.projectId || 2;
         this.base = "https://" + options.domain + "/index.php?/api/v2";
     }
     TestRail.prototype.isRunToday = function () {
@@ -20,6 +20,9 @@ var TestRail = /** @class */ (function () {
                 password: this.options.password,
             }
         }).then(function (response) {
+            if (!response.data.length) {
+                return false;
+            }
             _this.lastRunDate = response.data[0].description;
             // set current date with same format as this.lastRunDate
             _this.currentDate = moment(new Date()).format('L');
