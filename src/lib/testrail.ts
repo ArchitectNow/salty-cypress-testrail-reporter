@@ -4,13 +4,14 @@ import { TestRailOptions, TestRailResult } from './testrail.interface';
 import moment = require('moment');
 
 export class TestRail {
-  private base: String;
-  private runId: Number;
-  private projectId: Number = 2;
+  private base: string;
+  private runId: number;
+  private projectId: number;
   private lastRunDate: string;
   private currentDate: string;
 
   constructor(private options: TestRailOptions) {
+    this.projectId = options.projectId || 2;
     this.base = `https://${options.domain}/index.php?/api/v2`;
   }
 
@@ -24,6 +25,10 @@ export class TestRail {
           password: this.options.password,
       }
     }).then(response => {
+        if (!response.data.length) {
+          return false;
+        }
+
         this.lastRunDate = response.data[0].description;
 
         // set current date with same format as this.lastRunDate
