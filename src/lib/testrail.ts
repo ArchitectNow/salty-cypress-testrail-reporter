@@ -1,7 +1,6 @@
 const axios = require('axios');
 const chalk = require('chalk');
 import { TestRailOptions, TestRailResult } from './testrail.interface';
-import moment = require('moment');
 
 export class TestRail {
   private base: string;
@@ -10,42 +9,13 @@ export class TestRail {
   private lastRunDate: string;
   private currentDate: string;
 
-  constructor(private options: TestRailOptions) {
+  constructor(private options: TestRailOptions, private index: number) {
     this.projectId = options.projectId || 2;
     this.base = `https://${options.domain}/index.php?/api/v2`;
   }
 
-  public isRunToday() {
-    return axios({
-      method: 'get',
-      url: `${this.base}/get_runs/${this.projectId}`,
-      headers: { 'Content-Type': 'application/json' },
-      auth: {
-          username: this.options.username,
-          password: this.options.password,
-      }
-    }).then(response => {
-        if (!response.data.length) {
-          return false;
-        }
-
-        this.lastRunDate = response.data[0].description;
-
-        // set current date with same format as this.lastRunDate
-        this.currentDate = moment(new Date()).format('L');
-
-        if (this.lastRunDate === this.currentDate) {
-          console.log(`Test Run already created today. posting results to Test Run ID: R${response.data[0].id}`)
-          return true;
-        }
-        return false;
-      })
-      // .catch(error => console.error(error));
-  }
-
   public createRun(name: string, description: string) {
 
-    // If the lastRunDate of the most current test run is equal to today's date, don't create a new test run.
     axios({
       method: 'post',
       url: `${this.base}/add_run/${this.options.projectId}`,
@@ -55,7 +25,7 @@ export class TestRail {
           password: this.options.password,
       },
       data: JSON.stringify({
-          suite_id: this.options.suiteId,
+          suite_id: this.options.suiteId[this.index],
           name,
           description,
           include_all: true,
