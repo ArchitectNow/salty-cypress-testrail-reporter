@@ -2,41 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var axios = require('axios');
 var chalk = require('chalk');
-var moment = require("moment");
 var TestRail = /** @class */ (function () {
-    function TestRail(options) {
+    function TestRail(options, index) {
         this.options = options;
+        this.index = index;
         this.projectId = options.projectId || 2;
         this.base = "https://" + options.domain + "/index.php?/api/v2";
     }
-    TestRail.prototype.isRunToday = function () {
-        var _this = this;
-        return axios({
-            method: 'get',
-            url: this.base + "/get_runs/" + this.projectId,
-            headers: { 'Content-Type': 'application/json' },
-            auth: {
-                username: this.options.username,
-                password: this.options.password,
-            }
-        }).then(function (response) {
-            if (!response.data.length) {
-                return false;
-            }
-            _this.lastRunDate = response.data[0].description;
-            // set current date with same format as this.lastRunDate
-            _this.currentDate = moment(new Date()).format('L');
-            if (_this.lastRunDate === _this.currentDate) {
-                console.log("Test Run already created today. posting results to Test Run ID: R" + response.data[0].id);
-                return true;
-            }
-            return false;
-        });
-        // .catch(error => console.error(error));
-    };
     TestRail.prototype.createRun = function (name, description) {
         var _this = this;
-        // If the lastRunDate of the most current test run is equal to today's date, don't create a new test run.
         axios({
             method: 'post',
             url: this.base + "/add_run/" + this.options.projectId,
@@ -46,7 +20,7 @@ var TestRail = /** @class */ (function () {
                 password: this.options.password,
             },
             data: JSON.stringify({
-                suite_id: this.options.suiteId,
+                suite_id: this.options.suiteId[this.index],
                 name: name,
                 description: description,
                 include_all: true,
