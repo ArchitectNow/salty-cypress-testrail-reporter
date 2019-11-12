@@ -3,11 +3,11 @@ export interface TestRailOptions {
   username: string;
   password: string;
   projectId: number;
-  suiteId: number[];
   createTestRun: boolean;
   runId: number;
   assignedToId?: number;
-  runName: string[];
+  runName: string;
+  planId: number;
 }
 
 export enum Status {
